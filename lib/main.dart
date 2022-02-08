@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -34,21 +35,63 @@ class FireworksPage extends StatelessWidget {
       width: MediaQuery.of(context).size.width,
       decoration: boxDecoration,
       child: Stack(
-        children: const [
-          Positioned(
-            top: 200,
-            right: 100,
+        children: [
+          const Positioned(
+            top: -70,
+            right: -100,
             child: Fireworks(
               size: Size(300, 300),
               itemCount: 15,
+              itemWidthMin: 2.0,
+              itemWidthMax: 9.0,
+              delayStart: 0,
+              duration: 1500,
+            ),
+          ),
+          const Positioned(
+            top: 350,
+            right: 300,
+            child: Fireworks(
+              size: Size(300, 300),
+              itemCount: 15,
+              itemWidthMin: 2.0,
+              itemWidthMax: 10.0,
+              delayStart: 200,
+              duration: 800,
+            ),
+          ),
+          const Positioned(
+            top: 0,
+            right: -40,
+            child: Fireworks(
+              size: Size(130, 130),
+              itemCount: 12,
+              itemWidthMin: 2.0,
+              itemWidthMax: 8.0,
+              delayStart: 400,
+            ),
+          ),
+          const Positioned(
+            top: 400,
+            right: -60,
+            child: Fireworks(
+              size: Size(130, 130),
+              itemCount: 12,
+              itemWidthMin: 2.0,
+              itemWidthMax: 8.0,
+              delayStart: 550,
             ),
           ),
           Positioned(
-            top: -100,
-            right: -50,
-            child: Fireworks(
-              size: Size(500, 500),
-              itemCount: 15,
+            top: MediaQuery.of(context).size.height / 3,
+            right: 100,
+            child: const Fireworks(
+              size: Size(200, 200),
+              itemCount: 12,
+              itemWidthMin: 2.0,
+              itemWidthMax: 5.0,
+              delayStart: 300,
+              duration: 1300,
             ),
           ),
         ],
@@ -62,10 +105,29 @@ class Fireworks extends StatefulWidget {
     Key? key,
     this.itemCount = 12,
     required this.size,
+    required this.itemWidthMin,
+    required this.itemWidthMax,
+    this.delayStart = 0,
+    this.duration = 1000,
   }) : super(key: key);
 
+  /// Количество точек по окружности
   final int itemCount;
+
+  /// Стартовый диаметр точки
+  final double itemWidthMin;
+
+  /// Диаметр точки в конце анимации
+  final double itemWidthMax;
+
+  /// Размер холста
   final Size size;
+
+  /// Задержка старта анимации, миллисекунд
+  final int delayStart;
+
+  /// Длительность анимации фейерверка, миллисекунд
+  final int duration;
 
   @override
   State<Fireworks> createState() => _FireworksState();
@@ -75,37 +137,47 @@ class _FireworksState extends State<Fireworks> with TickerProviderStateMixin {
   final List<double> positions = [];
 
   double radius = 0.0;
-  double itemWidth = 2.0;
+  double itemWidthMin = 2.0;
   double itemWidthMax = 12.0;
 
   late final AnimationController controller;
   late final Animation<double> animation;
   late final Animation<double> animationSize;
 
+  late final Duration delay;
+
   @override
   void initState() {
+    delay = Duration(milliseconds: widget.delayStart);
+
+    itemWidthMin = widget.itemWidthMin;
+    itemWidthMax = widget.itemWidthMax;
+
     controller = AnimationController(
         vsync: this,
-        duration: const Duration(
-          milliseconds: 1000,
+        duration: Duration(
+          milliseconds: widget.duration,
         ))
-      ..addListener(() {
+      ..addListener(() async {
         if (controller.isCompleted) {
           controller.repeat();
         }
 
-        // log(radius.toString());
-
         setState(() {
           radius = animation.value;
-          itemWidth = animationSize.value;
+          itemWidthMin = animationSize.value;
         });
       });
     animation =
         Tween(begin: 0.0, end: widget.size.height / 2).animate(controller);
-    animationSize = Tween(begin: 0.0, end: itemWidthMax).animate(controller);
+    final _animationSize = CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeIn,
+    );
+    animationSize =
+        Tween(begin: 0.0, end: itemWidthMax).animate(_animationSize);
 
-    controller.forward();
+    Future.delayed(delay).then((value) => controller.forward());
 
     super.initState();
   }
@@ -120,7 +192,7 @@ class _FireworksState extends State<Fireworks> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return SinCanvas(
       radius: radius,
-      itemWidth: itemWidth,
+      itemWidth: itemWidthMin,
       itemNumber: widget.itemCount,
       size: widget.size,
     );
@@ -179,8 +251,8 @@ class SinPainter extends CustomPainter {
         final double angle =
             (2 * m.pi / itemNumber) + (2 * m.pi / itemNumber) * (index + 1);
         return Offset(
-          200 + radius * m.cos(angle),
-          200 + radius * m.sin(angle),
+          size.width / 2 + radius * m.cos(angle),
+          size.width / 2 + radius * m.sin(angle),
         );
       },
     );
