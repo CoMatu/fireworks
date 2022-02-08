@@ -41,6 +41,9 @@ class Fireworks extends StatefulWidget {
 
 class _FireworksState extends State<Fireworks> {
   final List<double> positions = [];
+
+  double radius = 0.0;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -50,24 +53,31 @@ class _FireworksState extends State<Fireworks> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SinCanvas(),
+      body: SinCanvas(
+        radius: radius,
+      ),
     );
   }
 }
 
 class SinCanvas extends StatelessWidget {
-  const SinCanvas({Key? key}) : super(key: key);
+  const SinCanvas({
+    Key? key,
+    required this.radius,
+  }) : super(key: key);
 
-  static const radius = 200.0;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: CustomPaint(
-        size: const Size(400, 400),
-        painter: SinPainter(
-          radius: radius,
+    return Center(
+      child: Container(
+        color: Colors.orangeAccent,
+        child: CustomPaint(
+          size: const Size(400, 400),
+          painter: SinPainter(
+            radius: radius,
+          ),
         ),
       ),
     );
@@ -89,8 +99,17 @@ class SinPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..color = Colors.black;
 
-    final points =
-        List.generate(itemNumber, (index) => Offset(radius / 2, radius / 2));
+    final points = List.generate(
+      itemNumber,
+      (index) {
+        final double angle =
+            (2 * pi / itemNumber) + (2 * pi / itemNumber) * (index + 1);
+        return Offset(
+          200 + radius * cos(angle),
+          200 + radius * sin(angle),
+        );
+      },
+    );
 
     canvas.drawPoints(PointMode.points, points, paint);
   }
