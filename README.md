@@ -4,6 +4,8 @@
 
 !["Фейерверки на странице завершения создания проекта"](assets/fireworks.gif height=640)
 
+<img src="assets/fireworks.gif" width="100" height="100">
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
