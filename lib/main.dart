@@ -36,10 +36,10 @@ class FireworksPage extends StatelessWidget {
       child: Stack(
         children: [
           const Positioned(
-            top: -70,
-            right: -100,
+            top: -70.0,
+            right: -100.0,
             child: Fireworks(
-              size: Size(300, 300),
+              size: Size(300.0, 300.0),
               itemCount: 15,
               itemWidthMin: 2.0,
               itemWidthMax: 9.0,
@@ -48,10 +48,10 @@ class FireworksPage extends StatelessWidget {
             ),
           ),
           const Positioned(
-            top: 350,
-            right: 300,
+            top: 350.0,
+            right: 300.0,
             child: Fireworks(
-              size: Size(300, 300),
+              size: Size(300.0, 300.0),
               itemCount: 15,
               itemWidthMin: 2.0,
               itemWidthMax: 10.0,
@@ -61,9 +61,9 @@ class FireworksPage extends StatelessWidget {
           ),
           const Positioned(
             top: 0,
-            right: -40,
+            right: -40.0,
             child: Fireworks(
-              size: Size(130, 130),
+              size: Size(130.0, 130.0),
               itemCount: 12,
               itemWidthMin: 2.0,
               itemWidthMax: 8.0,
@@ -71,10 +71,10 @@ class FireworksPage extends StatelessWidget {
             ),
           ),
           const Positioned(
-            top: 400,
-            right: -60,
+            top: 400.0,
+            right: -60.0,
             child: Fireworks(
-              size: Size(130, 130),
+              size: Size(130.0, 130.0),
               itemCount: 12,
               itemWidthMin: 2.0,
               itemWidthMax: 8.0,
@@ -83,9 +83,9 @@ class FireworksPage extends StatelessWidget {
           ),
           Positioned(
             top: MediaQuery.of(context).size.height / 3,
-            right: 100,
+            right: 100.0,
             child: const Fireworks(
-              size: Size(200, 200),
+              size: Size(200.0, 200.0),
               itemCount: 12,
               itemWidthMin: 2.0,
               itemWidthMax: 5.0,
@@ -140,7 +140,11 @@ class _FireworksState extends State<Fireworks> with TickerProviderStateMixin {
   double itemWidthMax = 12.0;
 
   late final AnimationController controller;
+
+  /// Тип анимации для скорости разлёта точек
   late final Animation<double> animation;
+
+  /// Тип анимации для изменения размера (диаметра) точек
   late final Animation<double> animationSize;
 
   late final Duration delay;
@@ -157,28 +161,33 @@ class _FireworksState extends State<Fireworks> with TickerProviderStateMixin {
         duration: Duration(
           milliseconds: widget.duration,
         ))
-      ..addListener(() async {
-        if (controller.isCompleted) {
-          controller.repeat();
-        }
+      ..addListener(animationListener);
 
-        setState(() {
-          radius = animation.value;
-          itemWidthMin = animationSize.value;
-        });
-      });
     animation =
         Tween(begin: 0.0, end: widget.size.height / 2).animate(controller);
+
     final _animationSize = CurvedAnimation(
       parent: controller,
       curve: Curves.easeIn,
     );
+
     animationSize =
         Tween(begin: 0.0, end: itemWidthMax).animate(_animationSize);
 
     Future.delayed(delay).then((value) => controller.forward());
 
     super.initState();
+  }
+
+  void animationListener() async {
+    if (controller.isCompleted) {
+      controller.repeat();
+    }
+
+    setState(() {
+      radius = animation.value;
+      itemWidthMin = animationSize.value;
+    });
   }
 
   @override
