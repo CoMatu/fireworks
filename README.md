@@ -2,7 +2,7 @@
 
 Виджет для имитации фейерверка из разлетающихся точек. Как на картинке:
 
-<img src="assets/fireworks.gif" width="360" height="640">
+<img src="assets/fireworks.gif" width="360" height="800">
 
 ## Getting Started
 
