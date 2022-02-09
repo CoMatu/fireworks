@@ -2,9 +2,7 @@
 
 Виджет для имитации фейерверка из разлетающихся точек. Как на картинке:
 
-!["Фейерверки на странице завершения создания проекта"](assets/fireworks.gif height=640)
-
-<img src="assets/fireworks.gif" width="100" height="100">
+<img src="assets/fireworks.gif" width="360" height="640">
 
 ## Getting Started
 
