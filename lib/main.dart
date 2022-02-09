@@ -39,12 +39,13 @@ class FireworksPage extends StatelessWidget {
             top: -70.0,
             right: -100.0,
             child: Fireworks(
-              size: Size(300.0, 300.0),
+              size: Size(500.0, 500.0),
               itemCount: 15,
               itemWidthMin: 2.0,
               itemWidthMax: 9.0,
               delayStart: 0,
               duration: 1500,
+              color: Colors.red,
             ),
           ),
           const Positioned(
@@ -68,6 +69,7 @@ class FireworksPage extends StatelessWidget {
               itemWidthMin: 2.0,
               itemWidthMax: 8.0,
               delayStart: 400,
+              color: Color.fromARGB(255, 205, 254, 252),
             ),
           ),
           const Positioned(
@@ -79,6 +81,7 @@ class FireworksPage extends StatelessWidget {
               itemWidthMin: 2.0,
               itemWidthMax: 8.0,
               delayStart: 550,
+              color: Colors.yellow,
             ),
           ),
           Positioned(
@@ -91,6 +94,19 @@ class FireworksPage extends StatelessWidget {
               itemWidthMax: 5.0,
               delayStart: 300,
               duration: 1300,
+            ),
+          ),
+          const Positioned(
+            bottom: -50,
+            right: 100.0,
+            child: Fireworks(
+              size: Size(200.0, 200.0),
+              itemCount: 12,
+              itemWidthMin: 2.0,
+              itemWidthMax: 5.0,
+              delayStart: 300,
+              duration: 1300,
+              color: Color.fromARGB(255, 82, 255, 243),
             ),
           ),
         ],
@@ -108,6 +124,7 @@ class Fireworks extends StatefulWidget {
     required this.itemWidthMax,
     this.delayStart = 0,
     this.duration = 1000,
+    this.color = Colors.white,
   }) : super(key: key);
 
   /// Количество точек по окружности
@@ -118,6 +135,9 @@ class Fireworks extends StatefulWidget {
 
   /// Диаметр точки в конце анимации
   final double itemWidthMax;
+
+  /// Цвет точки
+  final Color color;
 
   /// Размер холста
   final Size size;
@@ -140,6 +160,7 @@ class _FireworksState extends State<Fireworks> with TickerProviderStateMixin {
   double itemWidthMax = 12.0;
 
   late final AnimationController controller;
+  late final AnimationController sizeController;
 
   /// Тип анимации для скорости разлёта точек
   late final Animation<double> animation;
@@ -163,11 +184,18 @@ class _FireworksState extends State<Fireworks> with TickerProviderStateMixin {
         ))
       ..addListener(animationListener);
 
+    sizeController = AnimationController(
+        vsync: this,
+        duration: Duration(
+          milliseconds: widget.duration,
+        ))
+      ..addListener(animationListener);
+
     animation =
         Tween(begin: 0.0, end: widget.size.height / 2).animate(controller);
 
     final _animationSize = CurvedAnimation(
-      parent: controller,
+      parent: sizeController,
       curve: Curves.easeIn,
     );
 
@@ -175,6 +203,7 @@ class _FireworksState extends State<Fireworks> with TickerProviderStateMixin {
         Tween(begin: 0.0, end: itemWidthMax).animate(_animationSize);
 
     Future.delayed(delay).then((value) => controller.forward());
+    Future.delayed(delay).then((value) => sizeController.forward());
 
     super.initState();
   }
@@ -182,6 +211,7 @@ class _FireworksState extends State<Fireworks> with TickerProviderStateMixin {
   void animationListener() async {
     if (controller.isCompleted) {
       controller.repeat();
+      sizeController.repeat();
     }
 
     setState(() {
@@ -198,28 +228,31 @@ class _FireworksState extends State<Fireworks> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return SinCanvas(
+    return FireworksCanvas(
       radius: radius,
       itemWidth: itemWidthMin,
       itemNumber: widget.itemCount,
       size: widget.size,
+      color: widget.color,
     );
   }
 }
 
-class SinCanvas extends StatelessWidget {
-  const SinCanvas({
+class FireworksCanvas extends StatelessWidget {
+  const FireworksCanvas({
     Key? key,
     required this.radius,
     required this.itemWidth,
     required this.itemNumber,
     required this.size,
+    required this.color,
   }) : super(key: key);
 
   final double radius;
   final double itemWidth;
   final int itemNumber;
   final Size size;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -227,23 +260,26 @@ class SinCanvas extends StatelessWidget {
 
     return CustomPaint(
       size: size,
-      painter: SinPainter(
+      painter: FireworksPainter(
         radius: radius,
         itemNumber: itemNumber,
         itemWidth: itemWidth,
+        color: color,
       ),
     );
   }
 }
 
-class SinPainter extends CustomPainter {
+class FireworksPainter extends CustomPainter {
   final double radius;
   final int itemNumber;
   final double itemWidth;
+  final Color color;
 
-  SinPainter({
+  FireworksPainter({
     required this.radius,
     required this.itemWidth,
+    required this.color,
     this.itemNumber = 12,
   });
   @override
@@ -251,7 +287,7 @@ class SinPainter extends CustomPainter {
     final paint = Paint()
       ..strokeWidth = itemWidth
       ..strokeCap = StrokeCap.round
-      ..color = Colors.white;
+      ..color = color;
 
     final points = List.generate(
       itemNumber,
